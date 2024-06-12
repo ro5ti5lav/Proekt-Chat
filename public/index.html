@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="/css/styles.min.css">
+</head>
+
+<body>
+    <div id="login">
+        <input id="username" placeholder="Username" /><br />
+        <input id="password" type="password" placeholder="Пароль" /><br />
+        <button id="register">Регистрация</button>
+        <button id="loginBtn">Вход</button>
+    </div>
+    <div id="chat" style="display:none;">
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" placeholder="Напишите сообщение" /><button>Послать</button>
+        </form>
+        <form id="privateForm" action="">
+            <input id="recipient" placeholder="Получатель" />
+            <input id="privateInput" autocomplete="off" placeholder="Сообщение" />
+            <button>Послать</button>
+        </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket;
+        document.getElementById('register').onclick = async () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                connectToSocket();
+            } else {
+                alert(data.error);
+            }
+        };
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                connectToSocket();
+            } else {
+                alert(data.error);
+            }
+        };
+
+        const connectToSocket = () => {
+            const token = localStorage.getItem('token');
+            socket = io({ query: { token } });
+
+            socket.on('connect', () => {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+            });
+
+            const form = document.getElementById('form');
+            const input = document.getElementById('input');
+            const messages = document.getElementById('messages');
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (input.value) {
+                    socket.emit('publicMessage', input.value);
+                    input.value = '';
+                }
+            });
+
+            socket.on('publicMessage', (msg) => {
+                const item = document.createElement('li');
+                item.textContent = `${msg.sender}: ${msg.message}`;
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+            });
+
+            const privateForm = document.getElementById('privateForm');
+            const recipientInput = document.getElementById('recipient');
+            const privateInput = document.getElementById('privateInput');
+
+            privateForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (privateInput.value && recipientInput.value) {
+                    socket.emit('privateMessage', { recipient: recipientInput.value, message: privateInput.value });
+                    privateInput.value = '';
+                }
+            });
+
+            socket.on('privateMessage', (msg) => {
+                const item = document.createElement('li');
+                item.textContent = `Private from ${msg.sender}: ${msg.message}`;
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+            });
+        };
+    </script>
+</body>
+
+</html>

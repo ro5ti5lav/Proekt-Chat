@@ -1,0 +1,82 @@
+// styles/styles.scss
+
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$background-color: #f8f9fa;
+$text-color: #212529;
+$input-border-color: #ced4da;
+$button-hover-color: darken($primary-color, 10%);
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: $background-color;
+    color: $text-color;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#login,
+#chat {
+    border: 1px solid $input-border-color;
+    padding: 20px;
+    background: #fff;
+    max-width: 400px;
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid $input-border-color;
+    border-radius: 5px;
+}
+
+button {
+    background-color: $primary-color;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $button-hover-color;
+    }
+}
+
+#messages {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+#messages li {
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    background: $background-color;
+    border: 1px solid $input-border-color;
+    border-radius: 5px;
+}
+
+#form,
+#privateForm {
+    display: flex;
+    gap: 10px;
+}
+
+#form input,
+#privateForm input {
+    flex: 1;
+}
+
+#privateForm {
+    margin-top: 10px;
+}
